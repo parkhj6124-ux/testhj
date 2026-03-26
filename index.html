@@ -2,41 +2,61 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Tetris 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tetris Mobile 2026</title>
     <style>
-        :root { --main-bg: #1a1a1a; --accent: #00f0f0; }
+        :root { --main-bg: #1a1a1a; --accent: #00f0f0; --btn-bg: #333; --btn-active: #555; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
-            background: var(--main-bg); color: #fff; font-family: sans-serif;
-            margin: 0; display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; overflow: hidden; touch-action: manipulation;
+            background: var(--main-bg); color: #fff; font-family: -apple-system, sans-serif;
+            margin: 0; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            height: 100vh; overflow: hidden; touch-action: none;
         }
-        #game-container { 
-            position: relative; margin-top: 10px; 
-            border: 2px solid #444; background: #000;
-        }
-        canvas { display: block; }
         
-        /* 상단 정보 창 */
-        #header { width: 240px; display: flex; justify-content: space-between; padding: 10px 0; }
-        .stat-box { text-align: center; }
-        .label { font-size: 10px; color: #888; }
-        .value { font-size: 18px; font-weight: bold; color: var(--accent); }
+        /* 상단 헤더 */
+        #header { width: 90%; max-width: 320px; display: flex; justify-content: space-between; padding: 15px 0 10px; }
+        .stat-box { text-align: center; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 8px; }
+        .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .value { font-size: 20px; font-weight: 700; color: var(--accent); }
+
+        /* 게임 컨테이너 및 캔버스 */
+        #game-container { 
+            position: relative; width: 90%; max-width: 320px;
+            border: 2px solid #333; background: #000; border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden;
+        }
+        canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1.6; } /* 세로 비율 줄임 */
+
+        /* 시작 화면 오버레이 */
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 10;
+        }
+        #start-btn {
+            background: var(--accent); color: #000; border: none; padding: 15px 40px;
+            font-size: 22px; font-weight: bold; border-radius: 30px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 240, 240, 0.3); transition: transform 0.1s;
+        }
+        #start-btn:active { transform: scale(0.95); }
 
         /* 모바일 컨트롤러 */
         #controls { 
-            margin-top: auto; margin-bottom: 30px;
-            display: grid; grid-template-columns: repeat(3, 70px); 
-            grid-template-rows: repeat(2, 70px); gap: 10px;
+            width: 90%; max-width: 360px; padding-bottom: 20px;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
         }
         .btn {
-            background: #333; border: none; border-radius: 10px;
-            color: white; font-size: 24px; font-weight: bold;
+            background: var(--btn-bg); border: none; border-radius: 15px;
+            color: white; font-size: 28px; height: 65px;
             display: flex; align-items: center; justify-content: center;
-            user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        .btn:active { background: #555; transform: scale(0.95); }
-        .btn-wide { grid-column: span 3; height: 50px; margin-top: 5px; font-size: 16px; }
+        .btn:active { background: var(--btn-active); transform: scale(0.96); }
+        .btn-rotate { grid-column: 2; grid-row: 1; font-size: 24px; }
+        .btn-left { grid-column: 1; grid-row: 2; }
+        .btn-drop { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+        .btn-hard { grid-column: span 3; height: 50px; font-size: 16px; margin-top: 5px; background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -47,15 +67,18 @@
     </div>
 
     <div id="game-container">
-        <canvas id="tetris" width="240" height="480"></canvas>
+        <canvas id="tetris"></canvas>
+        <div id="overlay">
+            <button id="start-btn" onclick="startGame()">START</button>
+        </div>
     </div>
 
     <div id="controls">
-        <div class="btn" onclick="playerRotate(1)">↻</div>
-        <div class="btn" onclick="playerMove(-1)">←</div>
-        <div class="btn" onclick="playerMove(1)">→</div>
-        <div class="btn" style="grid-column: 2;" onclick="playerDrop()">↓</div>
-        <button class="btn btn-wide" onclick="hardDrop()">HARD DROP</button>
+        <button class="btn btn-rotate" onclick="playerRotate(1)">↻</button>
+        <button class="btn btn-left" onclick="playerMove(-1)">←</button>
+        <button class="btn btn-drop" onclick="playerDrop()">↓</button>
+        <button class="btn btn-right" onclick="playerMove(1)">→</button>
+        <button class="btn btn-hard" onclick="hardDrop()">HARD DROP</button>
     </div>
 
     <script>
@@ -63,8 +86,23 @@
         const context = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
         const levelElement = document.getElementById('level');
+        const overlay = document.getElementById('overlay');
 
-        context.scale(24, 24);
+        // 게임판 크기 (가로 10, 세로 16로 세로를 줄임)
+        const ARENA_WIDTH = 10;
+        const ARENA_HEIGHT = 16;
+        
+        // 캔버스 크기 동적 설정
+        function resizeCanvas() {
+            const containerWidth = document.getElementById('game-container').clientWidth;
+            const blockSize = containerWidth / ARENA_WIDTH;
+            canvas.width = containerWidth;
+            canvas.height = blockSize * ARENA_HEIGHT;
+            context.scale(blockSize, blockSize);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
         function createPiece(type) {
             if (type === 'I') return [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
@@ -78,16 +116,32 @@
 
         const colors = [null, '#00f0f0', '#f0a000', '#0000f0', '#f0f000', '#f00000', '#00f000', '#a000f0'];
 
-        // --- 저장 및 불러오기 ---
+        let arena = createArena(ARENA_WIDTH, ARENA_HEIGHT);
+        let player = { pos: {x: 0, y: 0}, matrix: null, score: 0 };
+        let gameRunning = false;
+        let dropCounter = 0;
+        let dropInterval = 1000;
+        let lastTime = 0;
+
+        function startGame() {
+            overlay.style.display = 'none';
+            gameRunning = true;
+            if (!loadGame()) {
+                playerReset();
+            }
+            update();
+        }
+
         function saveGame() {
-            localStorage.setItem('tetris_save_2026', JSON.stringify({ arena, player }));
+            localStorage.setItem('tetris_save_v2', JSON.stringify({ arena, player }));
         }
 
         function loadGame() {
-            const data = localStorage.getItem('tetris_save_2026');
+            const data = localStorage.getItem('tetris_save_v2');
             if (data) {
                 const saved = JSON.parse(data);
-                saved.arena.forEach((row, y) => row.forEach((val, x) => arena[y][x] = val));
+                if (saved.arena.length !== ARENA_HEIGHT) return false; // 비율 다르면 무시
+                arena = saved.arena;
                 Object.assign(player, saved.player);
                 updateScore();
                 return true;
@@ -142,6 +196,7 @@
         }
 
         function playerDrop() {
+            if (!gameRunning) return;
             player.pos.y++;
             if (collide(arena, player)) {
                 player.pos.y--;
@@ -154,12 +209,14 @@
         }
 
         function hardDrop() {
+            if (!gameRunning) return;
             while(!collide(arena, player)) player.pos.y++;
             player.pos.y--;
             playerDrop();
         }
 
         function playerMove(dir) {
+            if (!gameRunning) return;
             player.pos.x += dir;
             if (collide(arena, player)) player.pos.x -= dir;
             saveGame();
@@ -171,14 +228,19 @@
             player.pos.y = 0;
             player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
             if (collide(arena, player)) {
+                // Game Over
                 arena.forEach(row => row.fill(0));
                 player.score = 0;
                 updateScore();
-                localStorage.removeItem('tetris_save_2026');
+                gameRunning = false;
+                overlay.style.display = 'flex';
+                document.getElementById('start-btn').innerText = 'RESTART';
+                localStorage.removeItem('tetris_save_v2');
             }
         }
 
         function playerRotate(dir) {
+            if (!gameRunning) return;
             const pos = player.pos.x;
             let offset = 1;
             rotate(player.matrix, dir);
@@ -198,7 +260,7 @@
             context.fillStyle = '#000';
             context.fillRect(0, 0, canvas.width, canvas.height);
             drawMatrix(arena, {x: 0, y: 0});
-            drawMatrix(player.matrix, player.pos);
+            if (player.matrix) drawMatrix(player.matrix, player.pos);
         }
 
         function drawMatrix(matrix, offset) {
@@ -208,18 +270,15 @@
                         context.fillStyle = colors[value];
                         context.fillRect(x + offset.x, y + offset.y, 1, 1);
                         context.lineWidth = 0.05;
-                        context.strokeStyle = '#000';
+                        context.strokeStyle = 'rgba(0,0,0,0.5)';
                         context.strokeRect(x + offset.x, y + offset.y, 1, 1);
                     }
                 });
             });
         }
 
-        let dropCounter = 0;
-        let dropInterval = 1000;
-        let lastTime = 0;
-
         function update(time = 0) {
+            if (!gameRunning) return;
             const deltaTime = time - lastTime;
             lastTime = time;
             dropCounter += deltaTime;
@@ -229,4 +288,13 @@
         }
 
         function updateScore() {
-            scoreElement.innerText = player.
+            scoreElement.innerText = player.score;
+            levelElement.innerText = Math.floor(player.score / 100) + 1;
+            dropInterval = Math.max(150, 1000 - (Math.floor(player.score / 100) * 100));
+        }
+
+        // 초기 화면 그리기
+        draw();
+    </script>
+</body>
+</html>
