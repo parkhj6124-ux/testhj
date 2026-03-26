@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tetris Mobile 2026</title>
+    <title>Tetris Slim 2026</title>
     <style>
-        :root { --main-bg: #1a1a1a; --accent: #00f0f0; --btn-bg: #333; --btn-active: #555; }
+        :root { --main-bg: #121212; --accent: #00f0f0; --btn-bg: #2a2a2a; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             background: var(--main-bg); color: #fff; font-family: -apple-system, sans-serif;
@@ -14,49 +14,45 @@
             height: 100vh; overflow: hidden; touch-action: none;
         }
         
-        /* 상단 헤더 */
-        #header { width: 90%; max-width: 320px; display: flex; justify-content: space-between; padding: 15px 0 10px; }
-        .stat-box { text-align: center; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 8px; }
-        .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .value { font-size: 20px; font-weight: 700; color: var(--accent); }
+        /* 상단 점수판 - 더 슬림하게 */
+        #header { width: 100%; max-width: 300px; display: flex; justify-content: space-around; padding: 10px 0; }
+        .stat-box { text-align: center; }
+        .label { font-size: 9px; color: #666; letter-spacing: 0.5px; }
+        .value { font-size: 18px; font-weight: 600; color: var(--accent); }
 
-        /* 게임 컨테이너 및 캔버스 */
+        /* 게임 컨테이너 - 세로 길이를 늘림 */
         #game-container { 
-            position: relative; width: 90%; max-width: 320px;
-            border: 2px solid #333; background: #000; border-radius: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden;
+            position: relative; width: 85%; max-width: 280px;
+            border: 1px solid #333; background: #000; border-radius: 10px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.8); overflow: hidden;
+            flex-grow: 1; margin: 5px 0;
         }
-        canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1.6; } /* 세로 비율 줄임 */
+        canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
 
-        /* 시작 화면 오버레이 */
+        /* 시작 버튼 오버레이 */
         #overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10;
+            background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10;
         }
         #start-btn {
-            background: var(--accent); color: #000; border: none; padding: 15px 40px;
-            font-size: 22px; font-weight: bold; border-radius: 30px; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 240, 240, 0.3); transition: transform 0.1s;
+            background: var(--accent); color: #000; border: none; padding: 12px 30px;
+            font-size: 18px; font-weight: bold; border-radius: 25px; cursor: pointer;
         }
-        #start-btn:active { transform: scale(0.95); }
 
-        /* 모바일 컨트롤러 */
+        /* 하단 컨트롤러 - 작고 예쁘게 재배치 */
         #controls { 
-            width: 90%; max-width: 360px; padding-bottom: 20px;
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            width: 100%; max-width: 320px; padding: 10px 20px 20px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
         }
         .btn {
-            background: var(--btn-bg); border: none; border-radius: 15px;
-            color: white; font-size: 28px; height: 65px;
+            background: var(--btn-bg); border: none; border-radius: 12px;
+            color: white; font-size: 20px; height: 50px;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        .btn:active { background: var(--btn-active); transform: scale(0.96); }
-        .btn-rotate { grid-column: 2; grid-row: 1; font-size: 24px; }
-        .btn-left { grid-column: 1; grid-row: 2; }
-        .btn-drop { grid-column: 2; grid-row: 2; }
-        .btn-right { grid-column: 3; grid-row: 2; }
-        .btn-hard { grid-column: span 3; height: 50px; font-size: 16px; margin-top: 5px; background: rgba(255,255,255,0.1); }
+        .btn:active { background: #444; transform: scale(0.92); }
+        .btn-rotate { background: #3a3a3a; }
+        .btn-hard { grid-column: span 4; height: 40px; font-size: 13px; color: #888; background: transparent; border: 1px solid #333; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -74,10 +70,10 @@
     </div>
 
     <div id="controls">
-        <button class="btn btn-rotate" onclick="playerRotate(1)">↻</button>
         <button class="btn btn-left" onclick="playerMove(-1)">←</button>
-        <button class="btn btn-drop" onclick="playerDrop()">↓</button>
+        <button class="btn btn-rotate" onclick="playerRotate(1)">↻</button>
         <button class="btn btn-right" onclick="playerMove(1)">→</button>
+        <button class="btn btn-drop" onclick="playerDrop()">↓</button>
         <button class="btn btn-hard" onclick="hardDrop()">HARD DROP</button>
     </div>
 
@@ -88,15 +84,16 @@
         const levelElement = document.getElementById('level');
         const overlay = document.getElementById('overlay');
 
-        // 게임판 크기 (가로 10, 세로 16로 세로를 줄임)
+        // 게임판 크기 (가로 10, 세로 22로 대폭 늘림)
         const ARENA_WIDTH = 10;
-        const ARENA_HEIGHT = 16;
+        const ARENA_HEIGHT = 22;
         
-        // 캔버스 크기 동적 설정
         function resizeCanvas() {
-            const containerWidth = document.getElementById('game-container').clientWidth;
-            const blockSize = containerWidth / ARENA_WIDTH;
-            canvas.width = containerWidth;
+            const containerWidth = canvas.parentElement.clientWidth;
+            const containerHeight = canvas.parentElement.clientHeight;
+            const blockSize = Math.min(containerWidth / ARENA_WIDTH, containerHeight / ARENA_HEIGHT);
+            
+            canvas.width = blockSize * ARENA_WIDTH;
             canvas.height = blockSize * ARENA_HEIGHT;
             context.scale(blockSize, blockSize);
         }
@@ -126,21 +123,19 @@
         function startGame() {
             overlay.style.display = 'none';
             gameRunning = true;
-            if (!loadGame()) {
-                playerReset();
-            }
+            if (!loadGame()) playerReset();
             update();
         }
 
         function saveGame() {
-            localStorage.setItem('tetris_save_v2', JSON.stringify({ arena, player }));
+            localStorage.setItem('tetris_v3_save', JSON.stringify({ arena, player }));
         }
 
         function loadGame() {
-            const data = localStorage.getItem('tetris_save_v2');
+            const data = localStorage.getItem('tetris_v3_save');
             if (data) {
                 const saved = JSON.parse(data);
-                if (saved.arena.length !== ARENA_HEIGHT) return false; // 비율 다르면 무시
+                if (saved.arena.length !== ARENA_HEIGHT) return false;
                 arena = saved.arena;
                 Object.assign(player, saved.player);
                 updateScore();
@@ -228,14 +223,13 @@
             player.pos.y = 0;
             player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
             if (collide(arena, player)) {
-                // Game Over
                 arena.forEach(row => row.fill(0));
                 player.score = 0;
                 updateScore();
                 gameRunning = false;
                 overlay.style.display = 'flex';
                 document.getElementById('start-btn').innerText = 'RESTART';
-                localStorage.removeItem('tetris_save_v2');
+                localStorage.removeItem('tetris_v3_save');
             }
         }
 
@@ -270,7 +264,7 @@
                         context.fillStyle = colors[value];
                         context.fillRect(x + offset.x, y + offset.y, 1, 1);
                         context.lineWidth = 0.05;
-                        context.strokeStyle = 'rgba(0,0,0,0.5)';
+                        context.strokeStyle = 'rgba(0,0,0,0.3)';
                         context.strokeRect(x + offset.x, y + offset.y, 1, 1);
                     }
                 });
@@ -290,10 +284,9 @@
         function updateScore() {
             scoreElement.innerText = player.score;
             levelElement.innerText = Math.floor(player.score / 100) + 1;
-            dropInterval = Math.max(150, 1000 - (Math.floor(player.score / 100) * 100));
+            dropInterval = Math.max(100, 1000 - (Math.floor(player.score / 100) * 100));
         }
 
-        // 초기 화면 그리기
         draw();
     </script>
 </body>
